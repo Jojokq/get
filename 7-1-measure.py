@@ -19,11 +19,11 @@ GPIO.setup(troyka, GPIO.OUT, initial = 1)
 
 GPIO.setup(comp, GPIO.IN)
 
-def decimal2binary(value):
+def decimal2binary(value): # converter from decimal number to binary
  
     return [int(bit) for bit in bin(value)[2:].zfill(8)]
 
-def adc (comp):
+def adc (comp):  # converts analog signal to digital on comp
     sig = [0,0,0,0,0,0,0,0]
     nsig = 0
     
@@ -40,7 +40,7 @@ def adc (comp):
     #volt = nsig/256*3.3
     return nsig
 
-def leds_push(nsig):
+def leds_push(nsig):  # fires leds
     for i in range (0, 8):
         if 32 * (i - 1) < nsig:
             GPIO.output(leds[i], 1)
@@ -49,11 +49,11 @@ def leds_push(nsig):
 
 
 
-try:
+try: # in first while charging condensator, in second uncharging
     volt = 0
     nsig = 0
     data = []
-    start_time = time.time()
+    start_time = time.time() # current time
     counter = 0
     while(nsig < 210):  #Use lower than 255 because of little amount of time
         nsig = adc(comp)
@@ -63,7 +63,7 @@ try:
         counter+=1
         
 
-    GPIO.output(troyka, 0)
+    GPIO.output(troyka, 0)  #uncharging
 
 
 
@@ -74,10 +74,10 @@ try:
         data.append(nsig)
         counter+=1
         
-    end_time = time.time() - start_time
+    end_time = time.time() - start_time # time of experiment
 
-    disc = counter/end_time
-    
+    disc = counter/end_time # sampling frequency
+
     plt.plot(data)
     plt.show()
     plt.savefig("AWESOME.png")
