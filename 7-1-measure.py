@@ -1,7 +1,6 @@
 import RPi.GPIO as GPIO
 import time
-import matplotlib.pyplot as pyplot
-import numpy as np
+import matplotlib.pyplot as plt
 
 
 dac = [ 26, 19, 13, 6, 5, 11, 9, 10 ]
@@ -37,7 +36,7 @@ def adc (comp):
         cmpVal = GPIO.input(comp)
         if cmpVal == 0:
             nsig-=2**i
-        
+    print("ADC value = {:^3} -> {}, input voltage = {:.2f}".format(nsig,sig,volt))
     #volt = nsig/256*3.3
     return nsig
 
@@ -52,13 +51,55 @@ def leds_push(nsig):
 
 try:
     volt = 0
+    nsig = 0
     data = []
-    start_t = time.clock()
-    while(volt < 250):
+    start_time = time.time()
+    counter = 0
+    while(nsig < 210):  #Use lower than 255 because of little amount of time
         nsig = adc(comp)
         volt = nsig /256 * 3.3
         leds_push(nsig)
-        time.sleep(0.05)
+        data.append(nsig)
+        counter+=1
+        
+
+    GPIO.output(troyka, 0)
+
+
+
+    while(nsig > 4):
+        nsig = adc(comp)
+        volt = nsig /256 * 3.3
+        leds_push(nsig)
+        data.append(nsig)
+        counter+=1
+        
+    end_time = time.time() - start_time
+
+    disc = counter/end_time
+    
+    plt.plot(data)
+    plt.show()
+    plt.savefig("AWESOME.png")
+    
+    
+
+
+
+
+
+
+    data_str = [str(item) for item in data]
+    print("время эксперимента  " + str(end_time) + "\nчастота дискретизации  " + str(disc) + "\nшаг квантования " + str(3.3/256) + "В")
+
+    with open("data.txt", "w") as datafile:
+        datafile.write("\n".join(data_str))
+    with open("settings.txt", "w") as settingsfile:
+        #settingsfile.write(str(start_time))
+        settingsfile.write(str(3.3/256))
+        settingsfile.write("\n")
+        settingsfile.write(str(disc))
+
         
 
 
